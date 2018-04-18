@@ -1,22 +1,20 @@
-FROM alpine:3.6
+FROM alpine:3.7
 
-# Install kubectl
-# Note: Latest version may be found on:
-# https://aur.archlinux.org/packages/kubectl-bin/
-ADD https://storage.googleapis.com/kubernetes-release/release/v1.9.3/bin/linux/amd64/kubectl /usr/local/bin/kubectl
+ARG TZ="Asia/Shanghai"
 
+ENV TZ ${TZ}
+ENV KUBE_VERSION v1.9.3
 ENV HOME=/config
 
-RUN set -x && \
-    apk add --no-cache curl ca-certificates && \
-    chmod +x /usr/local/bin/kubectl && \
-    \
-    # Create non-root user (with a randomly chosen UID/GUI).
-    adduser kubectl -Du 2342 -h /config && \
-    \
-    # Basic check it works.
-    kubectl version --client
+RUN apk upgrade --update \
+    && apk add --no-cache bash tzdata curl ca-certificates \
+    && curl https://storage.googleapis.com/kubernetes-release/release/${KUBE_VERSION}/bin/linux/amd64/kubectl --output /usr/local/bin/kubectl --silent \
+    && chmod +x /usr/local/bin/kubectl \
+    && ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime \
+    && echo ${TZ} > /etc/timezone \
+    && adduser kubectl -Du 2342 -h /config \
+    && rm -rf /var/cache/apk/*
 
 USER kubectl
 
-ENTRYPOINT ["/usr/local/bin/kubectl"]
+CMD ["/bin/bash"]
