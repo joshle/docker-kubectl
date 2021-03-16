@@ -4,7 +4,7 @@ ARG TZ="Asia/Shanghai"
 
 ENV TZ ${TZ}
 ENV KUBE_VERSION v1.9.7
-ENV HELM_VERSION v2.8.2
+ENV HELM_VERSION v2.16.12
 ENV HOME=/config
 
 RUN apk upgrade --update \
